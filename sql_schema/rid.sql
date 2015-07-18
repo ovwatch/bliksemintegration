@@ -1,7 +1,7 @@
 create extension postgis;
 CREATE SEQUENCE gtfs_version START 1;
 
-create table DataSource(
+create table datasource(
     id serial primary key NOT NULL,
     operator_id varchar(255) NOT NULL,
     name varchar(255) NOT NULL,
@@ -10,7 +10,7 @@ create table DataSource(
     url varchar (255)
 );
 
-create table Operator(
+create table operator(
     id serial primary key NOT NULL,
     operator_id varchar(255) NOT NULL,
     privatecode varchar(255) NOT NULL,
@@ -21,7 +21,7 @@ create table Operator(
     language varchar(2) NOT NULL
 );
 
-create table Version(
+create table version(
     id serial primary key,
     operator_id varchar(255),
     privatecode varchar(255) NOT NULL,
@@ -33,7 +33,7 @@ create table Version(
     versionminor integer
 );
 
-create table RejectedVersion(
+create table rejectedversion(
     id serial primary key,
     operator_id varchar(255),
     privatecode varchar(255) NOT NULL,
@@ -45,7 +45,7 @@ create table RejectedVersion(
 );
 
 
-create table AvailabilityCondition(
+create table availabilitycondition(
     id bigserial primary key NOT NULL,
     privatecode varchar(255) NOT NULL,
     operator_id varchar(255),
@@ -56,7 +56,7 @@ create table AvailabilityCondition(
     todate date
 );
 
-create table AvailabilityConditionDay(
+create table availabilityconditionday(
     id serial8,
     availabilityconditionRef integer references AvailabilityCondition(id) NOT NULL,
     validdate date NOT NULL,
@@ -64,7 +64,7 @@ create table AvailabilityConditionDay(
     primary key (availabilityconditionRef,validdate)
 );
 
-create table productCategory(
+create table productcategory(
     id bigserial primary key NOT NULL,
     privatecode varchar(255),
     operator_id varchar(255),
@@ -100,7 +100,7 @@ create table noticeassignment(
     validthru date
 );
 
-create table destinationDisplay(
+create table destinationdisplay(
     id bigserial primary key NOT NULL,
     privatecode varchar(255) NOT NULL,
     operator_id varchar(255),
@@ -125,7 +125,7 @@ create table pointintimedemandgroup(
     stopwaittime integer NOT NULL
 );
 
-create table Line(
+create table line(
     id bigserial primary key NOT NULL,
     operatorref integer references operator(id),
     privatecode varchar(255) NOT NULL,
@@ -139,13 +139,13 @@ create table Line(
     url varchar(255)
 );
 
-create table Route(
+create table route(
     id bigserial primary key NOT NULL,
     operator_id varchar(255) NOT NULL,
     lineref integer references line(id)
 );
 
-create table PointInRoute(
+create table pointinroute(
     routeref integer references route(id) NOT NULL,
     privatecode varchar(255),
     pointorder integer NOT NULL,
@@ -155,7 +155,7 @@ create table PointInRoute(
     primary key (routeref,pointorder)
 );
 
-create table AdministrativeZone(
+create table administrativezone(
     id bigserial primary key NOT NULL,
     privatecode varchar(255),
     operator_id varchar(255),
@@ -163,7 +163,7 @@ create table AdministrativeZone(
     description varchar (255)
 );
 
-create table JourneyPattern(
+create table journeypattern(
     id bigserial primary key NOT NULL,
     privatecode varchar(255),
     operator_id varchar(255),
@@ -172,7 +172,7 @@ create table JourneyPattern(
     destinationdisplayref integer references destinationDisplay(id)
 );
 
-create table StopArea(
+create table stoparea(
     id bigserial primary key NOT NULL,
     privatecode varchar(255),
     operator_id varchar(255),
@@ -184,7 +184,7 @@ create table StopArea(
     publiccode varchar(255)
 );
 
-create table StopPoint(
+create table stoppoint(
     id bigserial primary key NOT NULL,
     privatecode varchar(255),
     operator_id varchar(255),
@@ -210,7 +210,7 @@ id,privatecode,operator_id,publiccode,stoparearef,name,town,latitude,longitude,r
 restrictedmobilitysuitable
 FROM stoppoint where isscheduled = true);
 
-create table PointInJourneyPattern(
+create table pointinjourneypattern(
     journeypatternref integer references journeypattern(id) NOT NULL,
     pointorder integer NOT NULL,
     privatecode varchar(255),
@@ -230,7 +230,7 @@ create table PointInJourneyPattern(
     primary key (journeypatternref,pointorder)
 );
 
-create table Journey(
+create table journey(
     id bigserial primary key NOT NULL,
     privatecode varchar(255) NOT NULL,
     operator_id varchar(255) NOT NULL,
@@ -300,7 +300,7 @@ WHERE isavailable = true
 GROUP BY ac.id) as x
 );
 
-CREATE VIEW CurrentAvailabilityCondition AS (
+CREATE VIEW currentavailabilitycondition AS (
 SELECT id,privatecode,operator_id,unitcode,versionref,startdate,todate FROM (
 SELECT ac.id,privatecode,operator_id,unitcode,versionref,name,min(validdate) as startdate,max(validdate) as todate
 FROM AvailabilityCondition as ac LEFT JOIN AvailabilityConditionDay as ad ON ( ac.id = ad.availabilityconditionRef)
@@ -308,15 +308,15 @@ WHERE isavailable = true AND validdate >= date 'yesterday'
 GROUP BY ac.id) as x
 );
 
-CREATE VIEW ServiceJourney AS (
+CREATE VIEW servicejourney AS (
 SELECT * FROM journey WHERE isvirtual != true
 );
 
-CREATE VIEW ActiveServiceJourney AS (
+CREATE VIEW activeservicejourney AS (
 SELECT * FROM servicejourney WHERE AvailabilityConditionRef in (select id from ActiveAvailabilityCondition)
 );
 
-CREATE VIEW ServiceDay AS (
+CREATE VIEW serviceday AS (
 SELECT * FROM availabilityconditionday WHERE isavailable = true
 );
 
@@ -379,7 +379,7 @@ FROM
 ON (pjp_from.journeypatternref = pjp_to.journeypatternref AND pjp_from.idx = pjp_to.idx-1)
 );
 
-CREATE VIEW LinescheduledLink AS (
+CREATE VIEW linescheduledlink AS (
 SELECT DISTINCT l.id,pjp_from.pointref as from_pointref,pjp_to.pointref as to_pointref
 FROM
 (SELECT *,row_number() OVER (PARTITION BY journeypatternref ORDER BY pointorder) as idx FROM pointinjourneypattern as pjp

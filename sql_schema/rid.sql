@@ -1,4 +1,4 @@
-create extension postgis;
+#create extension postgis;
 CREATE SEQUENCE gtfs_version START 1;
 
 create table datasource(

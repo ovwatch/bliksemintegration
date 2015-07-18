@@ -20,7 +20,7 @@ cast(1 as integer) as pointorder,
 cast(CAST(ST_Y(the_geom) AS NUMERIC(8,5)) as text) AS latitude,
 cast(CAST(ST_X(the_geom) AS NUMERIC(7,5)) as text) AS longitude,
 cast(0 as integer) as distancefromstart
-FROM link,(select *,st_transform(st_setsrid(st_makepoint(locationx_ew,locationy_ns),28992),4326) as the_geom from point) as point
+FROM link,(select *,st_transform(st_setsrid(st_makepoint(cast(132342locationx_ew as double precision),cast(locationy_ns as double precision)),28992),4326) as the_geom from point) as point
 WHERE
 link.userstopcodebegin = point.pointcode AND
 link.dataownercode||':'||userstopcodebegin = %s AND
@@ -32,7 +32,7 @@ cast(2 as integer) as pointorder,
 cast(CAST(ST_Y(the_geom) AS NUMERIC(8,5)) as text) AS latitude,
 cast(CAST(ST_X(the_geom) AS NUMERIC(7,5)) as text) AS longitude,
 cast(distance as integer) as distancefromstart
-FROM link,(select *,st_transform(st_setsrid(st_makepoint(locationx_ew,locationy_ns),28992),4326) as the_geom from point) as point
+FROM link,(select *,st_transform(st_setsrid(st_makepoint(cast(locationx_ew as double precision),cast(locationy_ns as double precision)),28992),4326) as the_geom from point) as point
 WHERE
 link.userstopcodeend = point.pointcode AND
 link.dataownercode||':'||userstopcodebegin = %s AND
@@ -58,7 +58,7 @@ a.town as town,
 CAST(CAST(ST_Y(the_geom) AS NUMERIC(9,6)) AS text) AS latitude,
 CAST(CAST(ST_X(the_geom) AS NUMERIC(8,6)) AS text) AS longitude
 FROM (SELECT stopareacode,
-               ST_Transform(ST_setsrid(ST_makepoint(AVG(locationx_ew), AVG(locationy_ns)), 28992), 4326) AS the_geom
+               ST_Transform(ST_setsrid(ST_makepoint(cast(AVG(locationx_ew) as double precision), cast(AVG(locationy_ns) as double precision)), 28992), 4326) AS the_geom
         FROM (SELECT u.dataownercode || ':' ||u.userstopareacode AS stopareacode,
                        locationx_ew,
                        locationy_ns
@@ -94,8 +94,8 @@ CAST(CAST(ST_Y(the_geom) AS NUMERIC(9,6)) AS text) AS latitude,
 CAST(CAST(ST_X(the_geom) AS NUMERIC(8,6)) AS text) AS longitude,
 locationx_ew as rd_x,
 locationy_ns as rd_y
-FROM usrstop as u, (select dataownercode,pointcode,locationx_ew, locationy_ns,ST_Transform(ST_setsrid(ST_makepoint(locationx_ew, 
-locationy_ns), 28992), 4326) as the_geom from POINT) as p
+FROM usrstop as u, (select dataownercode,pointcode,locationx_ew, locationy_ns,ST_Transform(ST_setsrid(ST_makepoint(cast(locationx_ew as double precision), 
+cast(locationy_ns as double precision)), 28992), 4326) as the_geom from POINT) as p
 WHERE u.dataownercode = p.dataownercode AND u.userstopcode = p.pointcode
 """)
     for row in cur.fetchall():
@@ -250,7 +250,7 @@ cast(row_number() over (ORDER BY distancesincestartoflink) as integer) as pointo
 cast(CAST(ST_Y(the_geom) AS NUMERIC(8,5)) as text) AS latitude,
 cast(CAST(ST_X(the_geom) AS NUMERIC(7,5)) as text) AS longitude,
 cast(distancesincestartoflink as integer) as distancefromstart
-FROM pool,(select *,st_transform(st_setsrid(st_makepoint(locationx_ew,locationy_ns),28992),4326) as the_geom from point) as point
+FROM pool,(select *,st_transform(st_setsrid(st_makepoint(cast(locationx_ew as double precision),cast(locationy_ns as double precision)),28992),4326) as the_geom from point) as point
 WHERE
 pool.pointcode = point.pointcode AND
 pool.dataownercode||':'||userstopcodebegin = %s AND
